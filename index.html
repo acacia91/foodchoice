@@ -1,1 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>今天吃什么？- 终极版</title>
+    <style>
+        :root {
+            --primary: #FF5E00; /* 美团黄/淘宝橙 */
+            --bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #999999;
+            --shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .header {
+            position: absolute;
+            top: 40px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            margin: 0;
+            font-weight: 800;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-top: 5px;
+        }
+
+        /* 核心卡片区域 */
+        .card-wrapper {
+            width: 85%;
+            max-width: 350px;
+            height: 420px;
+            perspective: 1000px;
+            position: relative;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background: var(--card-bg);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+            box-sizing: border-box;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        /* 正面设计 */
+        .front {
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-placeholder {
+            width: 80px;
+            height: 80px;
+            background: #eee;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .food-name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-align: center;
+            line-height: 1.3;
+            margin-bottom: 10px;
+        }
+
+        .food-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            background: #FFF0E6;
+            color: var(--primary);
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        /* 背面设计 */
+        .back {
+            transform: rotateY(180deg);
+            justify-content: flex-start;
+        }
+
+        .back-title {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .data-row {
+            margin-bottom: 20px;
+        }
+
+        .data-label {
+            font-size: 0.8rem;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .data-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .desc-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+            margin-top: auto; /* 推到底部 */
+        }
+
+        /* 按钮区域 */
+        .action-area {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            box-shadow: 0 10px 20px rgba(255, 94, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.1s, filter 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            filter: brightness(0.9);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-main);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>今天吃什么?</h1>
+        <p>AI 严选 · 拒绝选择困难</p>
+    </div>
+
+    <div class="card-wrapper">
+        <div class="card" id="card">
+            <!-- 正面 -->
+            <div class="face front">
+                <div class="logo-placeholder" id="emoji">🍽️</div>
+                <div class="food-name" id="f-name">点击下方<br>开始随机</div>
+                <div class="food-tags" id="f-tags">
+                    <!-- 动态标签 -->
+                </div>
+            </div>
+            <!-- 背面 -->
+            <div class="face back">
+                <div class="back-title">SKU 详情档案</div>
+                
+                <div class="data-row">
+                    <div class="data-label">流派 / Style</div>
+                    <div class="data-value" id="b-style">--</div>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">参考价格 / Price</div>
+                    <div class="data-value" id="b-price">--</div>
+                </div>
+
+                <div class="desc-box" id="b-desc">
+                    请先抽取一个选项，点击卡片翻转查看详情。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-area">
+        <button class="btn" id="start-btn" onclick="startLottery()">
+            🎲 帮我选
+        </button>
+    </div>
+
+    <script>
+        // 1. 数据注入：这是刚才 Python 生成的高仿真数据
+        const db = [
+          {"id": "001", "name": "麦当劳·蜜汁手扒鸡", "style": "韩式炸鸡", "price": "¥25", "tags": ["💰穷鬼套餐", "全天营业"], "desc": "打工人的蛋白质补给站，咸甜口，适合不想吃碳水的时候。"},
+          {"id": "002", "name": "肯德基·疯狂星期四", "style": "美式经典", "price": "¥29.9", "tags": ["📅周四特供", "全家桶"], "desc": "V我50？不需要，V我30就够了。热量爆炸，快乐翻倍。"},
+          {"id": "003", "name": "塔斯汀·中式汉堡", "style": "国潮汉堡", "price": "¥18", "tags": ["🔥现烤饼皮", "高性价比"], "desc": "饼皮是现烤的，有点像肉夹馍和汉堡的混血儿，口感很韧。"},
+          {"id": "004", "name": "华莱士·喷射套餐", "style": "极限挑战", "price": "¥15", "tags": ["🚀喷射战士", "便宜"], "desc": "勇士的选择。如果你明天不需要早起，也不需要考试，可以一试。"},
+          {"id": "005", "name": "新疆炒米粉·爆辣", "style": "西域风味", "price": "¥22", "tags": ["🌶️爆辣", "重口味"], "desc": "没有一瓶冰可乐，不要轻易尝试。吃完记得擦汗。"},
+          {"id": "006", "name": "螺蛳粉·加炸蛋", "style": "柳州风味", "price": "¥18", "tags": ["💣生化武器", "真香"], "desc": "室友不在家时的最佳选择。炸蛋吸满汤汁是灵魂。"},
+          {"id": "007", "name": "沙县·鸭腿饭", "style": "国民食堂", "price": "¥12", "tags": ["💰省钱", "经典"], "desc": "不知道吃什么的时候，沙县永远是你最坚实的后盾。"},
+          {"id": "008", "name": "瑞幸·生椰拿铁", "style": "续命水", "price": "¥9.9", "tags": ["☕提神", "YYDS"], "desc": "与其说是咖啡，不如说是好喝的椰奶饮料。"},
+          {"id": "009", "name": "蜜雪·柠檬水", "style": "解渴神器", "price": "¥4", "tags": ["👑雪王", "巨便宜"], "desc": "4块钱你买不了吃亏，买不了上当。"},
+          {"id": "010", "name": "兰州拉面·牛肉面", "style": "清真", "price": "¥15", "tags": ["🍜碳水", "热汤"], "desc": "虽然肉薄如纸，但那口汤是真的鲜。记得加两勺辣子。"}
+        ];
+
+        const card = document.getElementById('card');
+        const btn = document.getElementById('start-btn');
+        let isRolling = false;
+        let isFlipped = false;
+
+        // 点击卡片翻转
+        card.addEventListener('click', () => {
+            if(!isRolling) {
+                isFlipped = !isFlipped;
+                card.classList.toggle('flipped', isFlipped);
+            }
+        });
+
+        function startLottery() {
+            if(isRolling) return;
+            
+            // 如果背面朝上，先翻回来
+            if(isFlipped) {
+                card.classList.remove('flipped');
+                isFlipped = false;
+                setTimeout(runEffect, 300);
+            } else {
+                runEffect();
+            }
+        }
+
+        function runEffect() {
+            isRolling = true;
+            btn.innerHTML = "🎲 计算中...";
+            btn.style.opacity = 0.8;
+
+            let count = 0;
+            const max = 15;
+            
+            const timer = setInterval(() => {
+                const item = db[Math.floor(Math.random() * db.length)];
+                renderFront(item);
+                count++;
+                
+                if(count >= max) {
+                    clearInterval(timer);
+                    const finalItem = db[Math.floor(Math.random() * db.length)];
+                    renderFront(finalItem);
+                    renderBack(finalItem);
+                    isRolling = false;
+                    btn.innerHTML = "🎲 不满意? 重抽";
+                    btn.style.opacity = 1;
+                    
+                    // 自动提示可以翻转
+                    document.getElementById('f-tags').innerHTML += `<div class="tag" style="background:#eee;color:#666">👆 点卡片看详情</div>`;
+                }
+            }, 80);
+        }
+
+        function renderFront(item) {
+            document.getElementById('f-name').innerText = item.name;
+            const emojis = {"汉堡": "🍔", "鸡": "🍗", "面": "🍜", "粉": "🍝", "饭": "🍛", "茶": "🧋", "咖啡": "☕"};
+            let icon = "🍽️";
+            for(let key in emojis) {
+                if(item.name.includes(key) || item.style.includes(key)) icon = emojis[key];
+            }
+            document.getElementById('emoji').innerText = icon;
+            
+            document.getElementById('f-tags').innerHTML = item.tags.map(t => 
+                `<span class="tag">${t}</span>`
+            ).join('');
+        }
+
+        function renderBack(item) {
+            document.getElementById('b-style').innerText = item.style;
+            document.getElementById('b-price').innerText = item.price;
+            document.getElementById('b-desc').innerText = item.desc;
+        }
+    </script>
+</body>
+</html>
 
