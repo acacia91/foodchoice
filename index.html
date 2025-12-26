@@ -4,58 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>今天吃什么？- 终极版</title>
+    <meta name="theme-color" content="#FF5E00">
+    <title>今天吃/喝什么？- 扩容版</title>
     <style>
         :root {
-            --primary: #FF5E00; /* 美团黄/淘宝橙 */
-            --bg: #f5f5f5;
+            --primary: #FF5E00;
+            --drink: #00A3FF; /* 饮料模式的主色调 */
+            --bg: #f8f8f8;
             --card-bg: #ffffff;
-            --text-main: #333333;
-            --text-sub: #999999;
-            --shadow: 0 8px 20px rgba(0,0,0,0.08);
+            --text-main: #333;
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             margin: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             overflow: hidden;
             -webkit-tap-highlight-color: transparent;
         }
 
-        .header {
+        /* 顶部切换开关 */
+        .switch-container {
+            margin-top: 30px;
+            background: #e0e0e0;
+            border-radius: 40px;
+            padding: 4px;
+            display: flex;
+            width: 220px;
+            position: relative;
+        }
+
+        .switch-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #888;
+            z-index: 2;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .switch-btn.active {
+            color: white;
+        }
+
+        .switch-bg {
             position: absolute;
-            top: 40px;
-            width: 100%;
-            text-align: center;
+            width: 50%;
+            height: 80%;
+            top: 10%;
+            left: 2px;
+            background: var(--primary);
+            border-radius: 35px;
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), background-color 0.3s;
+            z-index: 1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        .header h1 {
-            font-size: 1.5rem;
-            color: var(--text-main);
-            margin: 0;
-            font-weight: 800;
+        /* 饮料模式下的背景色变化 */
+        .switch-container.mode-drink .switch-bg {
+            transform: translateX(100%) translateX(-4px);
+            background: var(--drink);
         }
 
-        .header p {
-            font-size: 0.9rem;
-            color: var(--text-sub);
-            margin-top: 5px;
-        }
-
-        /* 核心卡片区域 */
+        /* 核心卡片 */
         .card-wrapper {
+            margin-top: 40px;
             width: 85%;
-            max-width: 350px;
+            max-width: 340px;
             height: 420px;
             perspective: 1000px;
-            position: relative;
         }
 
         .card {
@@ -83,211 +109,180 @@
             flex-direction: column;
             padding: 30px;
             box-sizing: border-box;
-            border: 1px solid rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.02);
         }
 
-        /* 正面设计 */
-        .front {
-            align-items: center;
-            justify-content: center;
-        }
+        .front { align-items: center; justify-content: center; }
+        .back { transform: rotateY(180deg); align-items: flex-start; }
 
-        .logo-placeholder {
-            width: 80px;
-            height: 80px;
-            background: #eee;
-            border-radius: 50%;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-        }
+        .emoji-icon { font-size: 4rem; margin-bottom: 20px; }
+        .food-name { font-size: 1.8rem; font-weight: 800; text-align: center; margin-bottom: 15px; color: var(--text-main); }
+        
+        .tags-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        .tag { font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; font-weight: 600; }
+        .tag.food { background: #FFF0E6; color: var(--primary); }
+        .tag.drink { background: #E6F6FF; color: var(--drink); }
 
-        .food-name {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--text-main);
-            text-align: center;
-            line-height: 1.3;
-            margin-bottom: 10px;
-        }
+        /* 背面详情 */
+        .detail-row { margin-bottom: 20px; width: 100%; }
+        .detail-label { font-size: 0.8rem; color: #aaa; margin-bottom: 5px; }
+        .detail-val { font-size: 1.1rem; font-weight: bold; color: #333; }
+        .desc-box { background: #f9f9f9; padding: 15px; border-radius: 12px; font-size: 0.95rem; color: #666; line-height: 1.5; margin-top: auto; }
 
-        .food-tags {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 15px;
-        }
-
-        .tag {
-            font-size: 0.75rem;
-            padding: 4px 10px;
-            background: #FFF0E6;
-            color: var(--primary);
-            border-radius: 12px;
-            font-weight: 600;
-        }
-
-        /* 背面设计 */
-        .back {
-            transform: rotateY(180deg);
-            justify-content: flex-start;
-        }
-
-        .back-title {
-            font-size: 0.9rem;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
-
-        .data-row {
-            margin-bottom: 20px;
-        }
-
-        .data-label {
-            font-size: 0.8rem;
-            color: #999;
-            margin-bottom: 4px;
-        }
-
-        .data-value {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        .desc-box {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            color: #666;
-            line-height: 1.6;
-            margin-top: auto; /* 推到底部 */
-        }
-
-        /* 按钮区域 */
-        .action-area {
-            position: absolute;
-            bottom: 40px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
+        /* 底部按钮 */
         .btn {
+            margin-top: 50px;
             background: var(--primary);
             color: white;
             border: none;
-            padding: 16px 40px;
+            padding: 18px 60px;
             border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            box-shadow: 0 10px 20px rgba(255, 94, 0, 0.2);
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(255, 94, 0, 0.25);
             cursor: pointer;
-            transition: transform 0.1s, filter 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            transition: transform 0.1s, background-color 0.3s, box-shadow 0.3s;
         }
 
-        .btn:active {
-            transform: scale(0.95);
-            filter: brightness(0.9);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: var(--text-main);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        .btn:active { transform: scale(0.95); }
+        
+        /* 饮料模式按钮变色 */
+        .btn.mode-drink {
+            background: var(--drink);
+            box-shadow: 0 10px 20px rgba(0, 163, 255, 0.25);
         }
 
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>今天吃什么?</h1>
-        <p>AI 严选 · 拒绝选择困难</p>
+    <!-- 顶部开关 -->
+    <div class="switch-container" id="switch-box">
+        <div class="switch-bg"></div>
+        <button class="switch-btn active" onclick="setMode('food')">干饭</button>
+        <button class="switch-btn" onclick="setMode('drink')">续命</button>
     </div>
 
+    <!-- 卡片区域 -->
     <div class="card-wrapper">
         <div class="card" id="card">
             <!-- 正面 -->
             <div class="face front">
-                <div class="logo-placeholder" id="emoji">🍽️</div>
-                <div class="food-name" id="f-name">点击下方<br>开始随机</div>
-                <div class="food-tags" id="f-tags">
-                    <!-- 动态标签 -->
-                </div>
+                <div class="emoji-icon" id="icon">🍽️</div>
+                <div class="food-name" id="f-name">今天吃点啥？</div>
+                <div class="tags-row" id="f-tags"></div>
             </div>
             <!-- 背面 -->
             <div class="face back">
-                <div class="back-title">SKU 详情档案</div>
-                
-                <div class="data-row">
-                    <div class="data-label">流派 / Style</div>
-                    <div class="data-value" id="b-style">--</div>
+                <div class="detail-row">
+                    <div class="detail-label">STYLE / 风格</div>
+                    <div class="detail-val" id="b-style">--</div>
                 </div>
-
-                <div class="data-row">
-                    <div class="data-label">参考价格 / Price</div>
-                    <div class="data-value" id="b-price">--</div>
+                <div class="detail-row">
+                    <div class="detail-label">PRICE / 预算</div>
+                    <div class="detail-val" id="b-price">--</div>
                 </div>
-
                 <div class="desc-box" id="b-desc">
-                    请先抽取一个选项，点击卡片翻转查看详情。
+                    点击下方按钮开始随机，点击卡片翻转查看详情。
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="action-area">
-        <button class="btn" id="start-btn" onclick="startLottery()">
-            🎲 帮我选
-        </button>
-    </div>
+    <button class="btn" id="start-btn" onclick="startLottery()">🎲 帮我选</button>
 
     <script>
-        // 1. 数据注入：这是刚才 Python 生成的高仿真数据
-        const db = [
-          {"id": "001", "name": "麦当劳·蜜汁手扒鸡", "style": "韩式炸鸡", "price": "¥25", "tags": ["💰穷鬼套餐", "全天营业"], "desc": "打工人的蛋白质补给站，咸甜口，适合不想吃碳水的时候。"},
-          {"id": "002", "name": "肯德基·疯狂星期四", "style": "美式经典", "price": "¥29.9", "tags": ["📅周四特供", "全家桶"], "desc": "V我50？不需要，V我30就够了。热量爆炸，快乐翻倍。"},
-          {"id": "003", "name": "塔斯汀·中式汉堡", "style": "国潮汉堡", "price": "¥18", "tags": ["🔥现烤饼皮", "高性价比"], "desc": "饼皮是现烤的，有点像肉夹馍和汉堡的混血儿，口感很韧。"},
-          {"id": "004", "name": "华莱士·喷射套餐", "style": "极限挑战", "price": "¥15", "tags": ["🚀喷射战士", "便宜"], "desc": "勇士的选择。如果你明天不需要早起，也不需要考试，可以一试。"},
-          {"id": "005", "name": "新疆炒米粉·爆辣", "style": "西域风味", "price": "¥22", "tags": ["🌶️爆辣", "重口味"], "desc": "没有一瓶冰可乐，不要轻易尝试。吃完记得擦汗。"},
-          {"id": "006", "name": "螺蛳粉·加炸蛋", "style": "柳州风味", "price": "¥18", "tags": ["💣生化武器", "真香"], "desc": "室友不在家时的最佳选择。炸蛋吸满汤汁是灵魂。"},
-          {"id": "007", "name": "沙县·鸭腿饭", "style": "国民食堂", "price": "¥12", "tags": ["💰省钱", "经典"], "desc": "不知道吃什么的时候，沙县永远是你最坚实的后盾。"},
-          {"id": "008", "name": "瑞幸·生椰拿铁", "style": "续命水", "price": "¥9.9", "tags": ["☕提神", "YYDS"], "desc": "与其说是咖啡，不如说是好喝的椰奶饮料。"},
-          {"id": "009", "name": "蜜雪·柠檬水", "style": "解渴神器", "price": "¥4", "tags": ["👑雪王", "巨便宜"], "desc": "4块钱你买不了吃亏，买不了上当。"},
-          {"id": "010", "name": "兰州拉面·牛肉面", "style": "清真", "price": "¥15", "tags": ["🍜碳水", "热汤"], "desc": "虽然肉薄如纸，但那口汤是真的鲜。记得加两勺辣子。"}
+        // === 数据库扩容 ===
+        // 分别定义食物和饮料数据
+        const dbFood = [
+            {n:"麦当劳·双层吉士", s:"美式快餐", p:"¥13", t:["穷鬼套餐","经典"], d:"1+1随心配的王者，搭配可乐就是快乐。"},
+            {n:"肯德基·吮指原味鸡", s:"美式快餐", p:"¥12", t:["经典","高热量"], d:"还得是原味鸡，记得要三角区，肉多油足。"},
+            {n:"汉堡王·皇堡", s:"火烤汉堡", p:"¥25", t:["量大","过瘾"], d:"一口下去全是肉感，火烤风味yyds。"},
+            {n:"塔斯汀·麻婆豆腐堡", s:"中式汉堡", p:"¥16", t:["国潮","现烤"], d:"豆腐和汉堡的魔幻结合，意外的好吃。"},
+            {n:"华莱士·蜜汁手扒鸡", s:"极限挑战", p:"¥15", t:["喷射战士","便宜"], d:"整只鸡才这个价，还要什么自行车？"},
+            {n:"沙县·鸭腿饭", s:"国民食堂", p:"¥14", t:["稳","下饭"], d:"不知道吃什么就选它，永远的神。"},
+            {n:"沙县·飘香拌面+扁肉", s:"国民食堂", p:"¥10", t:["情侣套餐","省钱"], d:"碳水双拼，快乐加倍。"},
+            {n:"兰州拉面·二细", s:"西北风味", p:"¥15", t:["清真","劲道"], d:"二细才是拉面的灵魂，记得加勺辣子。"},
+            {n:"新疆炒米粉", s:"重口", p:"¥22", t:["爆辣","过瘾"], d:"微辣是底线，吃完记得喝牛奶解辣。"},
+            {n:"柳州螺蛳粉", s:"生化武器", p:"¥16", t:["臭香","加炸蛋"], d:"闻着臭吃着香，炸蛋吸满汤汁绝了。"},
+            {n:"黄焖鸡米饭", s:"盖饭界一哥", p:"¥18", t:["下饭","不踩雷"], d:"汤汁拌饭能吃两碗，中国人的Comfort Food。"},
+            {n:"隆江猪脚饭", s:"男人的浪漫", p:"¥20", t:["胶原蛋白","顶饱"], d:"吃完这顿，不管是搬砖还是敲代码都有劲了。"},
+            {n:"麻辣烫(杨国福/张亮)", s:"自选", p:"¥25", t:["丰俭由人","热乎"], d:"想吃什么夹什么，最后那一勺麻酱是灵魂。"},
+            {n:"广式烧鸭饭", s:"粤菜", p:"¥22", t:["烧腊","偏甜"], d:"皮脆肉嫩，酸梅酱解腻，完美。"},
+            {n:"干炒牛河", s:"粤菜", p:"¥18", t:["镬气","油大"], d:"考验厨师功底的一道菜，必须有焦香味。"},
+            {n:"711·关东煮", s:"便利店", p:"¥15", t:["轻食","暖胃"], d:"萝卜、魔芋丝、鱼饼，加班狗的深夜慰藉。"},
+            {n:"老乡鸡·肥西老母鸡汤", s:"中式快餐", p:"¥30", t:["养生","干净"], d:"在这个预制菜横行的世界，喝口鸡汤补补。"},
+            {n:"必胜客·一人食比萨", s:"西餐", p:"¥39", t:["小资","芝士"], d:"一个人也要好好吃饭，芝士拉丝治愈一切。"},
+            {n:"酸菜鱼(太二/鱼你在一起)", s:"川菜", p:"¥35", t:["酸爽","下饭"], d:"酸菜比鱼好吃，汤都能喝光。"},
+            {n:"煎饼果子", s:"街头小吃", p:"¥8", t:["双蛋","薄脆"], d:"切克闹！加两个蛋是对自己最大的宠爱。"}
         ];
 
-        const card = document.getElementById('card');
-        const btn = document.getElementById('start-btn');
+        const dbDrink = [
+            {n:"瑞幸·生椰拿铁", s:"咖啡", p:"¥9.9", t:["续命","YYDS"], d:"把咖啡做成了饮料，从此瑞幸起死回生。"},
+            {n:"瑞幸·冰吸生椰", s:"咖啡", p:"¥9.9", t:["凉爽","薄荷"], d:"喝一口天灵盖都凉了，夏天必备。"},
+            {n:"星巴克·冰美式", s:"咖啡", p:"¥30", t:["消肿","苦"], d:"真正的打工人只喝冰美式，因为生活更苦。"},
+            {n:"Manner·拿铁", s:"精品咖啡", p:"¥15", t:["自带杯","品质"], d:"带个杯子去减5块，口感吊打连锁店。"},
+            {n:"蜜雪·冰鲜柠檬水", s:"果茶", p:"¥4", t:["穷鬼首选","解渴"], d:"4块钱要什么自行车？它不嫌你穷，你别嫌它土。"},
+            {n:"喜茶·多肉葡萄", s:"鲜果茶", p:"¥19", t:["经典","果肉"], d:"喜茶的成名作，剥皮葡萄yyds。"},
+            {n:"奈雪·霸气橙子", s:"鲜果茶", p:"¥19", t:["维C","清爽"], d:"满满的橙子维C，喝完感觉自己变健康了。"},
+            {n:"霸王茶姬·伯牙绝弦", s:"鲜奶茶", p:"¥16", t:["清爽","无植脂末"], d:"茉莉茶底很香，不甜不腻，包装还好看。"},
+            {n:"Coco·鲜芋青稞牛奶", s:"奶茶", p:"¥15", t:["管饱","料多"], d:"这不是饮料，这是一碗粥，喝完不用吃饭了。"},
+            {n:"一点点·四季奶青", s:"奶茶", p:"¥13", t:["波霸","经典"], d:"不管网红怎么变，一点点永远是那个味。"},
+            {n:"古茗·超A芝士葡萄", s:"果茶", p:"¥18", t:["芝士","浓郁"], d:"古茗在三四线城市就是王者，用料实在。"},
+            {n:"茶百道·杨枝甘露", s:"甜品饮品化", p:"¥16", t:["浓郁","芒果"], d:"好喝是好喝，就是吸管容易堵。"},
+            {n:"东方树叶·茉莉花茶", s:"瓶装茶", p:"¥5", t:["0卡","解腻"], d:"以前觉得像刷锅水，现在觉得真香。成熟的标志。"},
+            {n:"可口可乐(冰)", s:"碳酸", p:"¥3", t:["快乐水","杀精"], d:"必须是冰镇的！第一口下去打个嗝，爽翻。"},
+            {n:"维他柠檬茶", s:"盒装", p:"¥4", t:["上头","涩"], d:"维他柠檬茶，爽过吸大麻（梗）。"},
+            {n:"旺仔牛奶", s:"童年", p:"¥6", t:["甜","回忆"], d:"再看？再看我就把你喝掉！"}
+        ];
+
+        // === 逻辑层 ===
+        let currentMode = 'food'; // 'food' or 'drink'
+        let currentDB = dbFood;
         let isRolling = false;
         let isFlipped = false;
 
-        // 点击卡片翻转
-        card.addEventListener('click', () => {
+        const card = document.getElementById('card');
+        const btn = document.getElementById('start-btn');
+        const switchBox = document.getElementById('switch-box');
+        const switchBtns = document.querySelectorAll('.switch-btn');
+
+        // 切换模式
+        function setMode(mode) {
+            if(isRolling) return;
+            currentMode = mode;
+            currentDB = (mode === 'food') ? dbFood : dbDrink;
+
+            // UI 更新
+            switchBox.className = `switch-container mode-${mode}`;
+            btn.className = `btn mode-${mode}`;
+            switchBtns[0].classList.toggle('active', mode === 'food');
+            switchBtns[1].classList.toggle('active', mode === 'drink');
+            
+            // 重置卡片
+            if(isFlipped) flipCard();
+            setTimeout(() => {
+                document.getElementById('icon').innerText = (mode === 'food') ? "🍽️" : "🥤";
+                document.getElementById('f-name').innerText = (mode === 'food') ? "今天吃点啥？" : "今天喝点啥？";
+                document.getElementById('f-tags').innerHTML = "";
+                document.getElementById('b-desc').innerText = "点击下方按钮开始随机...";
+            }, 300);
+        }
+
+        // 翻转逻辑
+        card.addEventListener('click', flipCard);
+        function flipCard() {
             if(!isRolling) {
                 isFlipped = !isFlipped;
                 card.classList.toggle('flipped', isFlipped);
             }
-        });
+        }
 
+        // 抽奖逻辑
         function startLottery() {
             if(isRolling) return;
-            
-            // 如果背面朝上，先翻回来
             if(isFlipped) {
-                card.classList.remove('flipped');
-                isFlipped = false;
+                flipCard();
                 setTimeout(runEffect, 300);
             } else {
                 runEffect();
@@ -296,52 +291,66 @@
 
         function runEffect() {
             isRolling = true;
-            btn.innerHTML = "🎲 计算中...";
+            btn.innerHTML = (currentMode === 'food') ? "🍳 翻炒中..." : "🍹 调制中...";
             btn.style.opacity = 0.8;
 
             let count = 0;
-            const max = 15;
+            const max = 20; // 滚动次数
             
             const timer = setInterval(() => {
-                const item = db[Math.floor(Math.random() * db.length)];
+                const item = currentDB[Math.floor(Math.random() * currentDB.length)];
                 renderFront(item);
                 count++;
                 
                 if(count >= max) {
                     clearInterval(timer);
-                    const finalItem = db[Math.floor(Math.random() * db.length)];
-                    renderFront(finalItem);
-                    renderBack(finalItem);
-                    isRolling = false;
-                    btn.innerHTML = "🎲 不满意? 重抽";
-                    btn.style.opacity = 1;
-                    
-                    // 自动提示可以翻转
-                    document.getElementById('f-tags').innerHTML += `<div class="tag" style="background:#eee;color:#666">👆 点卡片看详情</div>`;
+                    finalize();
                 }
-            }, 80);
+            }, 60);
+        }
+
+        function finalize() {
+            const finalItem = currentDB[Math.floor(Math.random() * currentDB.length)];
+            renderFront(finalItem);
+            renderBack(finalItem);
+            
+            isRolling = false;
+            btn.innerHTML = "🎲 不满意? 重选";
+            btn.style.opacity = 1;
+            
+            // 提示翻转
+            const tagClass = currentMode;
+            document.getElementById('f-tags').innerHTML += 
+                `<div class="tag ${tagClass}" style="background:#eee;color:#888;border:1px dashed #ccc">👆 点卡片看详情</div>`;
         }
 
         function renderFront(item) {
-            document.getElementById('f-name').innerText = item.name;
-            const emojis = {"汉堡": "🍔", "鸡": "🍗", "面": "🍜", "粉": "🍝", "饭": "🍛", "茶": "🧋", "咖啡": "☕"};
-            let icon = "🍽️";
-            for(let key in emojis) {
-                if(item.name.includes(key) || item.style.includes(key)) icon = emojis[key];
-            }
-            document.getElementById('emoji').innerText = icon;
+            document.getElementById('f-name').innerText = item.n;
             
-            document.getElementById('f-tags').innerHTML = item.tags.map(t => 
-                `<span class="tag">${t}</span>`
+            // 智能 Emoji 匹配
+            let icon = (currentMode === 'food') ? "🥘" : "🧃";
+            const name = item.n + item.s;
+            if(name.includes("面") || name.includes("粉")) icon = "🍜";
+            else if(name.includes("堡") || name.includes("麦") || name.includes("肯")) icon = "🍔";
+            else if(name.includes("饭")) icon = "🍛";
+            else if(name.includes("鸡")) icon = "🍗";
+            else if(name.includes("咖") || name.includes("瑞")) icon = "☕";
+            else if(name.includes("茶")) icon = "🧋";
+            else if(name.includes("可") || name.includes("雪")) icon = "🥤";
+            
+            document.getElementById('icon').innerText = icon;
+
+            const tagClass = currentMode; // 'food' or 'drink'
+            document.getElementById('f-tags').innerHTML = item.t.map(t => 
+                `<span class="tag ${tagClass}">${t}</span>`
             ).join('');
         }
 
         function renderBack(item) {
-            document.getElementById('b-style').innerText = item.style;
-            document.getElementById('b-price').innerText = item.price;
-            document.getElementById('b-desc').innerText = item.desc;
+            document.getElementById('b-style').innerText = item.s;
+            document.getElementById('b-price').innerText = item.p;
+            document.getElementById('b-desc').innerText = item.d;
         }
     </script>
 </body>
 </html>
-
